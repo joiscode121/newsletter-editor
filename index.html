@@ -32,13 +32,15 @@
     position:absolute; cursor:text; background:transparent;
     border:1px solid transparent; overflow:hidden; line-height:1.35;
     transition:border-color 0.15s, background 0.15s;
-    color:transparent; /* invisible until hover/focus */
+    color:transparent; caret-color:transparent;
+    -webkit-text-fill-color:transparent;
   }
-  .tz:hover { border-color:rgba(232,113,26,0.35); background:rgba(255,255,200,0.15); color:transparent; }
+  .tz:hover { border-color:rgba(232,113,26,0.35); }
   .tz:focus {
-    border-color:#e8711a; background:rgba(255,255,255,0.97);
+    border-color:#e8711a; background:#fff;
     outline:none; z-index:20; box-shadow:0 0 8px rgba(232,113,26,0.3);
-    color:#333; /* show text when editing */
+    color:#333; caret-color:#333;
+    -webkit-text-fill-color:#333;
   }
 
   .iz {
