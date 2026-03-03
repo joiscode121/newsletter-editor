@@ -39,48 +39,187 @@ p { margin-bottom:4px; }
 </style>
 </head>
 <body>
-<div id="ed-toolbar" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#111;border-bottom:2px solid #e85d04;padding:8px 12px;display:flex;align-items:center;gap:8px;font-family:-apple-system,sans-serif;">
+<style id="editor-styles">
+  #ed-toolbar { position:fixed;top:0;left:0;right:0;z-index:99999;background:#111;border-bottom:2px solid #e85d04;padding:8px 12px;display:flex;align-items:center;gap:8px;font-family:-apple-system,sans-serif;flex-wrap:wrap; }
+  #ed-toolbar button { background:#333;color:#fff;border:1px solid #555;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px; }
+  #ed-toolbar button:hover { background:#444; }
+  #ed-toolbar .primary { background:#e85d04;border-color:#e85d04;font-weight:bold; }
+  #ed-toolbar .danger { background:#dc2626;border-color:#dc2626; }
+  .ed-img-selected { outline:3px solid #e85d04 !important; cursor:pointer !important; position:relative; }
+  .ed-img-overlay { position:absolute;top:4px;right:4px;z-index:100;display:flex;gap:4px; }
+  .ed-img-overlay button { background:rgba(0,0,0,0.8);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px; }
+  .ed-img-overlay button:hover { background:rgba(232,93,4,0.9); }
+  .ed-img-overlay .del:hover { background:rgba(220,38,38,0.9); }
+  .ed-add-img-zone { border:2px dashed #e85d04;border-radius:8px;padding:20px;text-align:center;color:#e85d04;cursor:pointer;margin:8px 0;font-size:12px;background:rgba(232,93,4,0.05); }
+  .ed-add-img-zone:hover { background:rgba(232,93,4,0.12); }
+</style>
+<div id="ed-toolbar">
 <span style="color:#e85d04;font-weight:bold;font-size:14px;">Newsletter Editor</span>
-<button onclick="window._toggleEdit()" id="ed-btn" style="background:#333;color:#fff;border:1px solid #555;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;">Enable Edit</button>
-<button onclick="window._edSave()" style="background:#e85d04;color:#fff;border:1px solid #e85d04;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:bold;">Save</button>
+<button onclick="window._toggleEdit()" id="ed-btn">Enable Edit</button>
+<button onclick="window._download()" class="primary">Download HTML</button>
+<input type="file" id="ed-file-input" accept="image/*" style="display:none" onchange="window._handleFileUpload(event)">
 <span id="ed-status" style="margin-left:auto;color:#aaa;font-size:11px;">Ready</span>
 </div>
 <div style="height:48px;"></div>
 <script>
 window._editing=false;
+window._selectedImg=null;
+
 window._toggleEdit=function(){
   window._editing=!window._editing;
-  var cards=document.querySelectorAll('.card,.card-w');
-  cards.forEach(function(c){
-    c.querySelectorAll('h3,p,span,li').forEach(function(el){
+  var btn=document.getElementById('ed-btn');
+  var status=document.getElementById('ed-status');
+  
+  if(window._editing){
+    // Make text editable
+    document.querySelectorAll('.card h3,.card p,.card span,.card li,.card-w h3,.card-w p,.card-w span,.card-w li').forEach(function(el){
       if(el.querySelector('img'))return;
-      if(window._editing){
-        el.contentEditable='true';
-        el.style.outline='1px dashed rgba(232,93,4,0.4)';
-        el.style.cursor='text';
-      }else{
-        el.removeAttribute('contenteditable');
-        el.style.outline='';
-        el.style.cursor='';
-      }
+      if(el.closest('[contenteditable="true"]'))return;
+      el.contentEditable='true';
+      el.style.outline='1px dashed rgba(232,93,4,0.4)';
+      el.style.cursor='text';
     });
-  });
-  document.getElementById('ed-btn').textContent=window._editing?'Disable Edit':'Enable Edit';
-  document.getElementById('ed-status').textContent=window._editing?'EDITING - click text to change':'View mode';
-  document.getElementById('ed-status').style.color=window._editing?'#22c55e':'#aaa';
+    
+    // Make images clickable
+    document.querySelectorAll('.card img,.card-w img,.fr img,header img').forEach(function(img){
+      img.style.cursor='pointer';
+      img.onclick=function(e){
+        e.stopPropagation();
+        window._selectImg(img);
+      };
+    });
+    
+    // Add "add image" zones after each card
+    document.querySelectorAll('.card,.card-w').forEach(function(card){
+      if(card.querySelector('.ed-add-img-zone'))return;
+      var zone=document.createElement('div');
+      zone.className='ed-add-img-zone';
+      zone.innerHTML='+ Click to add image here';
+      zone.onclick=function(){
+        window._addTarget=card;
+        document.getElementById('ed-file-input').click();
+      };
+      card.appendChild(zone);
+    });
+    
+    btn.textContent='Disable Edit';
+    status.textContent='EDITING - click text to edit, click images to modify';
+    status.style.color='#22c55e';
+  } else {
+    // Remove editability
+    document.querySelectorAll('[contenteditable]').forEach(function(el){
+      el.removeAttribute('contenteditable');
+      el.style.outline='';el.style.cursor='';
+    });
+    // Remove image handlers & overlays
+    document.querySelectorAll('.ed-img-overlay').forEach(function(o){o.remove();});
+    document.querySelectorAll('.ed-img-selected').forEach(function(i){i.classList.remove('ed-img-selected');});
+    document.querySelectorAll('.ed-add-img-zone').forEach(function(z){z.remove();});
+    document.querySelectorAll('img').forEach(function(i){i.onclick=null;i.style.cursor='';});
+    window._selectedImg=null;
+    
+    btn.textContent='Enable Edit';
+    status.textContent='View mode';
+    status.style.color='#aaa';
+  }
 };
-window._edSave=function(){
-  document.getElementById('ed-status').textContent='Saving...';
+
+window._selectImg=function(img){
+  // Deselect previous
+  document.querySelectorAll('.ed-img-overlay').forEach(function(o){o.remove();});
+  document.querySelectorAll('.ed-img-selected').forEach(function(i){i.classList.remove('ed-img-selected');});
+  
+  window._selectedImg=img;
+  img.classList.add('ed-img-selected');
+  
+  // Create overlay with buttons
+  var wrapper=img.parentElement;
+  wrapper.style.position='relative';
+  var overlay=document.createElement('div');
+  overlay.className='ed-img-overlay';
+  overlay.innerHTML='<button onclick="window._replaceImg()">Replace</button><button class="del" onclick="window._deleteImg()">Delete</button>';
+  wrapper.appendChild(overlay);
+};
+
+window._deleteImg=function(){
+  if(!window._selectedImg)return;
+  if(!confirm('Delete this image?'))return;
+  var img=window._selectedImg;
+  // Remove overlay
+  var overlay=img.parentElement.querySelector('.ed-img-overlay');
+  if(overlay)overlay.remove();
+  // Remove the image's container (usually .fr or the div wrapping it)
+  var container=img.closest('.fr')||img.parentElement;
+  container.remove();
+  window._selectedImg=null;
+  document.getElementById('ed-status').textContent='Image deleted';
+};
+
+window._replaceImg=function(){
+  if(!window._selectedImg)return;
+  window._replaceTarget=window._selectedImg;
+  window._addTarget=null;
+  document.getElementById('ed-file-input').click();
+};
+
+window._handleFileUpload=function(e){
+  var file=e.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var dataUrl=ev.target.result;
+    if(window._replaceTarget){
+      // Replace existing image
+      window._replaceTarget.src=dataUrl;
+      window._replaceTarget.classList.remove('ed-img-selected');
+      var ol=window._replaceTarget.parentElement.querySelector('.ed-img-overlay');
+      if(ol)ol.remove();
+      window._replaceTarget=null;
+      document.getElementById('ed-status').textContent='Image replaced';
+    } else if(window._addTarget){
+      // Add new image to card
+      var imgEl=document.createElement('img');
+      imgEl.src=dataUrl;
+      imgEl.style.width='100%';
+      imgEl.style.borderRadius='8px';
+      imgEl.style.marginTop='8px';
+      imgEl.style.objectFit='cover';
+      imgEl.onclick=function(ev2){ev2.stopPropagation();window._selectImg(imgEl);};
+      imgEl.style.cursor='pointer';
+      // Insert before the add-zone
+      var addZone=window._addTarget.querySelector('.ed-add-img-zone');
+      if(addZone)window._addTarget.insertBefore(imgEl,addZone);
+      else window._addTarget.appendChild(imgEl);
+      window._addTarget=null;
+      document.getElementById('ed-status').textContent='Image added';
+    }
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+};
+
+window._download=function(){
   var clone=document.documentElement.cloneNode(true);
+  // Remove editor elements
   clone.querySelector('#ed-toolbar').remove();
+  var edStyles=clone.querySelector('#editor-styles');if(edStyles)edStyles.remove();
+  var edOverrides=clone.querySelector('#editor-overrides');if(edOverrides)edOverrides.remove();
+  clone.querySelectorAll('.ed-img-overlay,.ed-add-img-zone').forEach(function(el){el.remove();});
+  clone.querySelectorAll('.ed-img-selected').forEach(function(el){el.classList.remove('ed-img-selected');});
   clone.querySelectorAll('[contenteditable]').forEach(function(el){el.removeAttribute('contenteditable');el.style.outline='';el.style.cursor='';});
-  fetch('/save',{method:'POST',headers:{'Content-Type':'text/html'},body:'<!DOCTYPE html>\n'+clone.outerHTML})
-  .then(function(r){return r.json()})
-  .then(function(d){
-    document.getElementById('ed-status').textContent=d.success?'Saved!':'Error';
-    document.getElementById('ed-status').style.color=d.success?'#22c55e':'red';
-  })
-  .catch(function(e){document.getElementById('ed-status').textContent='Error: '+e.message;});
+  clone.querySelectorAll('[onclick]').forEach(function(el){el.removeAttribute('onclick');});
+  // Remove spacer div
+  var spacer=clone.querySelector('div[style*="height:48px"]');if(spacer)spacer.remove();
+  // Remove the script block
+  var scripts=clone.querySelectorAll('script');scripts.forEach(function(s){if(s.textContent.indexOf('_toggleEdit')!==-1)s.remove();});
+  
+  var html='<!DOCTYPE html>\n'+clone.outerHTML;
+  var blob=new Blob([html],{type:'text/html'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='newsletter_edited.html';
+  a.click();
+  document.getElementById('ed-status').textContent='Downloaded!';
 };
 </script>
 
