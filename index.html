@@ -205,73 +205,114 @@ Sacred Pooja: A morning ceremony held at the Gaushala to offer thanks and seek b
 </div>
 
 <!-- ===== PAGE 4 ===== -->
-<div class="pw" id="p4">
-  <img class="bg" src="images_new/page-4.jpg">
+<div class="pw" id="p4" style="background:#fff;padding:0;">
 
-  <!-- P4: Header -->
-  <div class="iz" id="img-logo-4" data-label="Logo P4" style="left:3.7%;top:0.9%;width:2.2%;height:1.5%;" onclick="si(this)"><span class="lb">Logo</span></div>
-  <div class="tz" contenteditable="true" style="left:7%;top:1.1%;width:16%;height:1.2%;font-size:12px;font-weight:700;"></div>
-  <div class="tz" contenteditable="true" style="left:85%;top:1.1%;width:13%;height:1%;font-size:8px;letter-spacing:2px;text-align:right;"></div>
+  <!-- P4: Orange header bar (matching original) -->
+  <div style="background:#E85D04;padding:8px 30px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="images_new/logo.png" style="width:28px;height:28px;border-radius:50%;" onerror="this.style.display='none'">
+      <span style="font-family:Georgia,serif;font-size:13px;font-weight:700;color:#fff;">Texas Gaushala News</span>
+    </div>
+    <span style="font-family:Lato,sans-serif;font-size:8px;font-weight:700;color:rgba(255,255,255,0.85);letter-spacing:3px;">JAN - FEB 2026</span>
+  </div>
+  <div style="height:2px;background:#E85D04;"></div>
 
-  <!-- P4: Cover Madhavi speech photo area (y=3.5%-30%) with white -->
-  <div style="position:absolute;left:0;top:3.5%;width:100%;height:27%;z-index:10;background:#fff;"></div>
+  <!-- P4: Calf Spotlight -->
+  <div style="background:#F2F0ED;padding:20px 30px;">
+    <div style="width:70px;height:3px;background:#E85D04;margin-bottom:10px;"></div>
+    <div contenteditable="true" style="font-size:16px;font-weight:700;font-family:Georgia,serif;color:#000;margin-bottom:14px;">Calf Spotlight: Narayan</div>
+    <div style="display:flex;gap:16px;align-items:flex-start;">
+      <div style="flex-shrink:0;width:35%;">
+        <div class="iz" id="img-calf" data-label="Calf Narayan" style="position:relative;width:100%;height:0;padding-bottom:130%;overflow:hidden;" onclick="si(this)">
+          <img src="images_new/calf-narayan.jpg" style="width:100%;height:100%;object-fit:cover;object-position:center top;position:absolute;top:0;left:0;" onerror="this.parentElement.style.background='#ddd'">
+          <span class="lb">Calf Narayan</span>
+        </div>
+        <div style="background:#444;color:#fff;font-size:7px;font-weight:700;letter-spacing:2px;text-align:center;padding:5px 8px;">CALF NARAYAN</div>
+      </div>
+      <div style="flex:1;">
+        <div contenteditable="true" style="font-size:10.5px;line-height:1.6;font-family:Georgia,serif;color:#000;">Narayan was born to Radha in later part of 2025. He had some complications initially and was not readily accepted by his mother but he continued to be strong and today he is having fun with lot of other new calves born in the ranch.</div>
+        <div contenteditable="true" style="font-size:10.5px;line-height:1.6;font-family:Georgia,serif;color:#000;margin-top:10px;">He loves to be around visitors and can walk around fearlessly in between cows and humans as well.</div>
+      </div>
+    </div>
+  </div>
 
-  <!-- P4: Calf Spotlight (y=30.5%-54.6%) - transparent overlay on original page content -->
-  <div class="tz" contenteditable="true" style="left:5.5%;top:30.3%;width:25%;height:1.4%;font-size:12px;font-weight:700;font-family:Georgia,serif;"></div>
-  <div class="iz" id="img-calf" data-label="Calf Narayan" style="left:-3.4%;top:32.6%;width:39%;height:20.8%;" onclick="si(this)"><span class="lb">Calf Narayan</span></div>
-  <div class="tz" contenteditable="true" style="left:29%;top:32.7%;width:68%;height:7%;font-size:8.5px;line-height:1.55;font-family:Georgia,serif;"></div>
-  <div class="tz" contenteditable="true" style="left:5%;top:54.4%;width:12%;height:0.9%;font-size:7px;font-weight:700;letter-spacing:1px;text-align:center;"></div>
-
-  <!-- P4: Combined Volunteer Spotlight COVERING original volunteer text (y=56%-67%) -->
-  <div style="position:absolute;left:0;top:56%;width:100%;height:11.5%;z-index:10;background:#F2F0ED;padding:1.5% 4%;box-sizing:border-box;">
-    <div style="width:70px;height:3px;background:#E85D04;margin-bottom:8px;"></div>
-    <div contenteditable="true" style="font-size:16px;font-weight:700;font-family:Georgia,serif;color:#000;margin-bottom:8px;">Volunteer Spotlight</div>
-    <div style="display:flex;gap:14px;align-items:flex-start;">
-      <div style="flex-shrink:0;width:18%;">
-        <div class="iz" id="img-srihari-saritha" data-label="Srihari & Saritha" style="position:relative;width:100%;height:0;padding-bottom:100%;overflow:hidden;" onclick="si(this)">
+  <!-- P4: Volunteer Spotlight -->
+  <div style="background:#fff;padding:20px 30px;">
+    <div style="width:70px;height:3px;background:#E85D04;margin-bottom:10px;"></div>
+    <div contenteditable="true" style="font-size:16px;font-weight:700;font-family:Georgia,serif;color:#000;margin-bottom:14px;">Volunteer Spotlight</div>
+    <div style="display:flex;gap:16px;align-items:flex-start;">
+      <div style="flex-shrink:0;width:22%;">
+        <div class="iz" id="img-srihari-saritha" data-label="Srihari & Saritha" style="position:relative;width:100%;height:0;padding-bottom:120%;overflow:hidden;" onclick="si(this)">
           <img src="images_new/srihari-saritha.jpg" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;">
           <span class="lb">Srihari & Saritha</span>
         </div>
       </div>
       <div style="flex:1;">
-        <div contenteditable="true" style="font-size:10px;line-height:1.55;font-family:Georgia,serif;color:#000;">Srihari and Saritha are from Andhra Pradesh, India and live in Cypress, TX. Srihari is a Chemical Engineer and Saritha is a Software Engineer. Both their families came from agriculture background where cows are an integral part of their livelihoods. They believe that Gau Seva is equal to worshipping all gods as Cows are believed to be a walking temple containing various gods in them.</div>
-        <div contenteditable="true" style="font-size:10px;line-height:1.55;font-family:Georgia,serif;color:#000;margin-top:6px;">Our volunteers show up rain or shine. Early morning feedings, event setup, cleaning, facility repairs. They do it because they love these animals and believe in the mission. Whether you can give a few hours or a full day, there is always something meaningful to do at the Gaushala.</div>
+        <div contenteditable="true" style="font-size:10.5px;line-height:1.6;font-family:Georgia,serif;color:#000;">Srihari and Saritha are from Andhra Pradesh, India and live in Cypress, TX. Srihari is a Chemical Engineer and Saritha is a Software Engineer. Both their families came from agriculture background where cows are an integral part of their livelihoods. They believe that Gau Seva is equal to worshipping all gods as Cows are believed to be a walking temple containing various gods in them. They love to be part of Texas Gaushala mission and activities.</div>
+        <div contenteditable="true" style="font-size:10.5px;line-height:1.6;font-family:Georgia,serif;color:#000;margin-top:10px;">Our volunteers show up rain or shine. Early morning feedings, event setup, cleaning, facility repairs. They do it because they love these animals and believe in the mission. Whether you can give a few hours or a full day, there is always something meaningful to do at the Gaushala.</div>
       </div>
     </div>
   </div>
 
-  <!-- P4: Events (y=67%-80%) - transparent overlay on original -->
-  <div class="tz" contenteditable="true" style="left:5%;top:67.2%;width:14%;height:0.9%;font-size:7px;font-weight:700;letter-spacing:1px;"></div>
-  <div class="tz" contenteditable="true" style="left:5.5%;top:70.4%;width:42%;height:10%;font-size:8.5px;line-height:1.5;font-family:Georgia,serif;"></div>
-  <div class="tz" contenteditable="true" style="left:53%;top:70.4%;width:42%;height:10%;font-size:8.5px;line-height:1.5;font-family:Georgia,serif;"></div>
+  <!-- P4: Upcoming Events -->
+  <div style="padding:10px 30px 5px;">
+    <div style="display:inline-block;background:#333;color:#fff;font-size:8px;font-weight:700;letter-spacing:2px;padding:5px 14px;margin-bottom:14px;">UPCOMING EVENTS</div>
+    <div style="display:flex;gap:16px;">
+      <!-- Holika Dahan -->
+      <div style="flex:1;border-top:3px solid #E85D04;padding:12px 0;">
+        <div contenteditable="true" style="font-size:14px;font-weight:700;font-family:Georgia,serif;color:#000;">Holika Dahan 2026</div>
+        <div style="font-size:10px;font-weight:700;color:#E85D04;margin:4px 0;">Mar 03, 2026</div>
+        <div style="font-size:9px;color:#666;">5:30 PM - 7:00 PM</div>
+        <div contenteditable="true" style="font-size:10px;line-height:1.5;font-family:Georgia,serif;color:#000;margin:8px 0;">Celebrate the triumph of good over evil around the sacred bonfire.</div>
+        <div style="font-size:8.5px;color:#666;">20303 Kickapoo Rd, Waller, TX 77484</div>
+        <div style="background:#333;color:#fff;font-size:7px;font-weight:700;letter-spacing:2px;text-align:center;padding:6px 10px;margin-top:8px;">REGISTER AT TEXASGAUSHALA.COM/EVENTS</div>
+      </div>
+      <!-- Holi Mela -->
+      <div style="flex:1;border-top:3px solid #E85D04;padding:12px 0;">
+        <div contenteditable="true" style="font-size:14px;font-weight:700;font-family:Georgia,serif;color:#000;">Houston Holi Mela 2026</div>
+        <div style="font-size:10px;font-weight:700;color:#E85D04;margin:4px 0;">Mar 07, 2026</div>
+        <div style="font-size:9px;color:#666;">11:00 AM - 3:30 PM CST</div>
+        <div contenteditable="true" style="font-size:10px;line-height:1.5;font-family:Georgia,serif;color:#000;margin:8px 0;">A vibrant celebration of color, community, and the joy of spring.</div>
+        <div style="font-size:8.5px;color:#666;">Texas Gaushala, Waller, TX 77484</div>
+        <div style="background:#333;color:#fff;font-size:7px;font-weight:700;letter-spacing:2px;text-align:center;padding:6px 10px;margin-top:8px;">REGISTER AT TEXASGAUSHALA.COM/EVENTS</div>
+      </div>
+    </div>
+  </div>
 
-  <!-- P4: Get Involved (y=84.6%) -->
-  <div class="tz" contenteditable="true" style="left:5.5%;top:84.4%;width:15%;height:1.4%;font-size:12px;font-weight:700;font-family:Georgia,serif;"></div>
-  <div class="tz" contenteditable="true" style="left:5.5%;top:86.6%;width:90%;height:3%;font-size:8.5px;line-height:1.55;font-family:Georgia,serif;"></div>
+  <!-- P4: Get Involved -->
+  <div style="padding:12px 30px;">
+    <div contenteditable="true" style="font-size:14px;font-weight:700;font-family:Georgia,serif;color:#000;margin-bottom:6px;">Get Involved</div>
+    <div contenteditable="true" style="font-size:10px;line-height:1.55;font-family:Georgia,serif;color:#000;">To our incredible supporters: our deepest gratitude goes out to our Major Donors, Gau Grass members, corporate matching partners, and tireless volunteers. Your generous contributions and selfless dedication ensure our sacred cows have a place they can truly call home.</div>
+  </div>
 
-  <!-- P4: Social Media (y=92.6%) - hyperlinked -->
-  <div style="position:absolute;left:10%;top:92.4%;width:80%;display:flex;justify-content:space-around;align-items:center;z-index:15;">
-    <a href="https://www.instagram.com/texasgaushala" target="_blank" style="text-decoration:none;text-align:center;font-family:Lato,sans-serif;">
-      <div style="font-size:7.5px;font-weight:700;color:#fff;letter-spacing:1px;">INSTAGRAM</div>
-      <div style="font-size:6.5px;color:rgba(255,255,255,0.8);">@texasgaushala</div>
+  <!-- P4: Social Media Bar -->
+  <div style="background:#666;padding:10px 30px;display:flex;justify-content:space-around;align-items:center;">
+    <a href="https://www.instagram.com/texasgaushala" target="_blank" style="text-decoration:none;text-align:center;">
+      <div style="font-size:8px;font-weight:700;color:#fff;letter-spacing:1px;">INSTAGRAM</div>
+      <div style="font-size:7px;color:rgba(255,255,255,0.75);">@texasgaushala</div>
     </a>
-    <a href="https://www.facebook.com/TexasGaushala" target="_blank" style="text-decoration:none;text-align:center;font-family:Lato,sans-serif;">
-      <div style="font-size:7.5px;font-weight:700;color:#fff;letter-spacing:1px;">FACEBOOK</div>
-      <div style="font-size:6.5px;color:rgba(255,255,255,0.8);">TexasGaushala</div>
+    <a href="https://www.facebook.com/TexasGaushala" target="_blank" style="text-decoration:none;text-align:center;">
+      <div style="font-size:8px;font-weight:700;color:#fff;letter-spacing:1px;">FACEBOOK</div>
+      <div style="font-size:7px;color:rgba(255,255,255,0.75);">TexasGaushala</div>
     </a>
-    <a href="https://youtube.com/@texasgaushala3634" target="_blank" style="text-decoration:none;text-align:center;font-family:Lato,sans-serif;">
-      <div style="font-size:7.5px;font-weight:700;color:#fff;letter-spacing:1px;">YOUTUBE</div>
-      <div style="font-size:6.5px;color:rgba(255,255,255,0.8);">@texasgaushala3634</div>
+    <a href="https://youtube.com/@texasgaushala3634" target="_blank" style="text-decoration:none;text-align:center;">
+      <div style="font-size:8px;font-weight:700;color:#fff;letter-spacing:1px;">YOUTUBE</div>
+      <div style="font-size:7px;color:rgba(255,255,255,0.75);">@texasgaushala3634</div>
     </a>
-    <a href="https://www.linkedin.com/company/texas-gaushala" target="_blank" style="text-decoration:none;text-align:center;font-family:Lato,sans-serif;">
-      <div style="font-size:7.5px;font-weight:700;color:#fff;letter-spacing:1px;">LINKEDIN</div>
-      <div style="font-size:6.5px;color:rgba(255,255,255,0.8);">texas-gaushala</div>
+    <a href="https://www.linkedin.com/company/texas-gaushala" target="_blank" style="text-decoration:none;text-align:center;">
+      <div style="font-size:8px;font-weight:700;color:#fff;letter-spacing:1px;">LINKEDIN</div>
+      <div style="font-size:7px;color:rgba(255,255,255,0.75);">texas-gaushala</div>
     </a>
   </div>
 
-  <!-- P4: Footer -->
-  <div class="tz" contenteditable="true" style="left:2%;top:97.8%;width:30%;height:1%;font-size:10px;font-weight:700;color:#fff;"></div>
-  <div class="tz" contenteditable="true" style="left:85%;top:97.8%;width:13%;height:1%;font-size:7px;letter-spacing:2px;text-align:right;color:#fff;"></div>
+  <!-- P4: Quote + Footer -->
+  <div style="padding:10px 30px;text-align:center;">
+    <div style="font-size:10px;font-style:italic;color:#E85D04;font-family:Georgia,serif;">"Every act of seva toward Gau Mata is an act of devotion to the divine."</div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 30px;border-top:2px solid #E85D04;">
+    <div style="font-size:10px;font-weight:700;color:#E85D04;font-family:Georgia,serif;">Texas Gaushala &bull; www.texasgaushala.com</div>
+    <div style="font-size:7px;letter-spacing:2px;color:#888;">PAGE 4 OF 4</div>
+  </div>
 </div>
 
 <!-- ===== PAGE 5: EVENTS, DONATE, GET INVOLVED, CONTACT ===== -->
