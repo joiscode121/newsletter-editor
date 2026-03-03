@@ -6,259 +6,298 @@
 <title>Texas Gaushala Newsletter Editor</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#e0e0e0; font-family:system-ui,sans-serif; padding-top:52px; }
+  body { background:#d0d0d0; font-family:system-ui,sans-serif; padding-top:52px; }
 
   #ed-toolbar {
     position:fixed; top:0; left:0; right:0; z-index:9999;
     background:#1a1a1a; color:#fff; padding:10px 20px;
-    display:flex; align-items:center; gap:12px;
+    display:flex; align-items:center; gap:10px;
     font-size:13px; box-shadow:0 2px 8px rgba(0,0,0,0.4);
   }
   #ed-toolbar button {
-    background:#e8711a; color:#fff; border:none; padding:8px 16px;
+    background:#e8711a; color:#fff; border:none; padding:7px 14px;
     border-radius:4px; cursor:pointer; font-size:12px; font-weight:700;
-    letter-spacing:0.5px;
   }
   #ed-toolbar button:hover { background:#d06515; }
-  #ed-toolbar button.secondary { background:#555; }
-  #ed-toolbar button.secondary:hover { background:#666; }
-  #ed-toolbar button.danger { background:#c0392b; }
-  #ed-toolbar .status { margin-left:auto; color:#999; font-size:11px; }
-  #ed-toolbar .mode-label { 
-    background:#e8711a; padding:3px 8px; border-radius:3px; 
-    font-size:10px; font-weight:700; letter-spacing:1px;
+  #ed-toolbar button.sec { background:#555; }
+  #ed-toolbar button.sec:hover { background:#666; }
+  #ed-toolbar .sep { width:1px; height:24px; background:#444; }
+  #ed-toolbar .status { margin-left:auto; color:#999; font-size:11px; max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mode-tag { background:#e8711a; padding:2px 8px; border-radius:3px; font-size:10px; font-weight:700; letter-spacing:1px; }
+
+  .page-wrap {
+    width:870px; margin:16px auto; position:relative;
+    box-shadow:0 3px 16px rgba(0,0,0,0.2);
+    background:#fff;
+  }
+  .page-wrap img.base { width:100%; display:block; }
+
+  /* Editable text zones */
+  .tz {
+    position:absolute; cursor:text;
+    background:transparent; border:1px solid transparent;
+    overflow:hidden; line-height:1.35;
+    transition:border-color 0.15s, background 0.15s;
+  }
+  .tz:hover { border-color:rgba(232,113,26,0.4); background:rgba(255,255,255,0.15); }
+  .tz:focus, .tz[contenteditable]:focus {
+    border-color:#e8711a; background:rgba(255,255,255,0.95);
+    outline:none; z-index:20; box-shadow:0 0 8px rgba(232,113,26,0.3);
   }
 
-  .page-container {
-    width:870px; margin:20px auto; position:relative;
-    box-shadow:0 4px 20px rgba(0,0,0,0.15);
-  }
-  .page-container img.page-bg {
-    width:100%; display:block;
-  }
-
-  /* Image overlay zones */
-  .img-zone {
+  /* Image zones */
+  .iz {
     position:absolute; cursor:pointer;
-    border:2px solid transparent; transition:border-color 0.2s;
+    border:2px solid transparent; transition:all 0.15s;
     z-index:10;
   }
-  .img-zone:hover { border-color:rgba(232,113,26,0.6); }
-  .img-zone.selected { border:3px solid #e8711a; box-shadow:0 0 12px rgba(232,113,26,0.5); }
-  .img-zone .label {
-    position:absolute; top:-22px; left:0;
-    background:#e8711a; color:#fff; font-size:9px; font-weight:700;
-    padding:2px 6px; border-radius:2px; white-space:nowrap;
-    opacity:0; transition:opacity 0.2s; pointer-events:none;
+  .iz:hover { border-color:rgba(232,113,26,0.6); }
+  .iz.selected { border:3px solid #e8711a; box-shadow:0 0 12px rgba(232,113,26,0.5); }
+  .iz .tag {
+    position:absolute; top:-20px; left:0;
+    background:#e8711a; color:#fff; font-size:8px; font-weight:700;
+    padding:2px 5px; border-radius:2px; white-space:nowrap;
+    opacity:0; transition:opacity 0.15s; pointer-events:none;
   }
-  .img-zone:hover .label, .img-zone.selected .label { opacity:1; }
-
-  /* Replaced image overlay */
-  .img-zone img.replacement {
-    width:100%; height:100%; object-fit:cover; display:block;
+  .iz:hover .tag, .iz.selected .tag { opacity:1; }
+  .iz img.rep {
+    width:100%; height:100%; object-fit:cover;
     position:absolute; top:0; left:0;
   }
 
+  /* Hide for print */
   @media print {
     #ed-toolbar { display:none !important; }
-    body { padding-top:0; background:#fff; }
-    .img-zone { border:none !important; }
-    .img-zone .label { display:none !important; }
+    body { padding:0; background:#fff; }
+    .tz { border:none !important; background:transparent !important; box-shadow:none !important; }
+    .iz { border:none !important; box-shadow:none !important; }
+    .iz .tag { display:none !important; }
   }
 </style>
 </head>
 <body>
 
 <div id="ed-toolbar">
-  <span class="mode-label">EDITOR</span>
-  <span>Texas Gaushala Newsletter</span>
-  <button onclick="downloadPDF()">Download PDF</button>
-  <button class="secondary" onclick="downloadImages()">Export Images</button>
-  <button id="btn-replace" style="display:none" onclick="replaceImage()">Replace Image</button>
-  <span class="status" id="ed-status">Click any image zone to select and replace it.</span>
+  <span class="mode-tag">EDITOR</span>
+  <span>Newsletter</span>
+  <div class="sep"></div>
+  <button onclick="window.print()">Print / PDF</button>
+  <button id="btn-replace" style="display:none" onclick="replaceImg()">Replace Image</button>
+  <button class="sec" onclick="toggleZones()">Toggle Zones</button>
+  <span class="status" id="ed-status">Click text to edit. Click images to replace.</span>
 </div>
 
-<!-- PAGE 1 -->
-<div class="page-container" id="page-1">
-  <img class="page-bg" src="images_new/page-1.jpg" alt="Page 1">
-  
-  <!-- Logo -->
-  <div class="img-zone" id="img-logo" data-label="Logo" 
-       style="left:4.7%; top:1.2%; width:6%; height:5%;" onclick="selectZone(this)">
-    <span class="label">Logo</span>
-  </div>
-  
-  <!-- Hero group photo -->
-  <div class="img-zone" id="img-hero" data-label="Hero - Group Photo" 
-       style="left:4.7%; top:16.8%; width:90.6%; height:34%;" onclick="selectZone(this)">
-    <span class="label">Hero - Group Photo</span>
-  </div>
-  
-  <!-- Pongal celebration image -->
-  <div class="img-zone" id="img-pongal" data-label="Pongal Celebration" 
-       style="left:62%; top:58%; width:33.3%; height:37%;" onclick="selectZone(this)">
-    <span class="label">Pongal Celebration</span>
-  </div>
+<!-- ===== PAGE 1 ===== -->
+<div class="page-wrap" id="p1">
+  <img class="base" src="images_new/page-1.jpg">
+
+  <!-- P1 Header -->
+  <div class="tz" contenteditable="true" style="left:18.6%;top:0.2%;width:36%;height:4.6%;font-size:22px;font-weight:700;color:#e8711a;font-family:Georgia,serif;">TEXAS GAUSHALA NEWS</div>
+  <div class="tz" contenteditable="true" style="left:18.6%;top:4.4%;width:18%;height:1.2%;font-size:8px;letter-spacing:2px;color:#e8711a;">www.texasgaushala.com</div>
+  <div class="tz" contenteditable="true" style="left:77%;top:1.2%;width:20%;height:2.8%;font-size:13px;font-weight:700;color:#222;text-align:right;font-family:Georgia,serif;">January &ndash; February 2026</div>
+  <div class="tz" contenteditable="true" style="left:88%;top:3.8%;width:9%;height:1.2%;font-size:7px;letter-spacing:2px;color:#888;text-align:right;">EDITION 01</div>
+
+  <!-- P1 Welcome text -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:8.8%;width:87%;height:9.5%;font-size:9px;line-height:1.55;color:#333;font-family:Georgia,serif;">Welcome to Texas Gaushala! Step into a sanctuary where modern care meets ancient tradition. Since 2020, we have been a dedicated home for indigenous cows and diverse farm life, including our resident peacocks and ducks. Today, our sanctuary is proud to nurture around 60 cows in a natural, healthy environment designed for their well-being and your peace of mind. We believe that true change is possible when hearts and hands work together. Driven by innovation and a deep-rooted passion for animal welfare, we invite you to join hands with us. Whether you are here to connect with our animals through therapeutic cow cuddling or to support our mission through cow adoption and sponsorship, your presence makes a difference. Thank you for being part of our journey toward a more compassionate and sustainable future.</div>
+
+  <!-- P1 Section heading -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:58%;width:55%;height:3.2%;font-size:16px;font-weight:700;color:#222;font-family:Georgia,serif;">Community Spirit: Gaushala Pongal Celebration</div>
+
+  <!-- P1 Pongal body text -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:61.5%;width:62%;height:14.5%;font-size:9px;line-height:1.55;color:#333;font-family:Georgia,serif;">On January 17, the Gaushala hosted a vibrant Pongal celebration from 10:00 AM to 12:30 PM, bringing together 30 volunteers to honor the harvest season. In many Indian cultures, the third day of the harvest festival, Pongal, is celebrated as Mattu Pongal, a day dedicated entirely to honoring and thanking cattle for their essential role in agriculture.
+
+Sacred Pooja: A morning ceremony held at the Gaushala to offer thanks and seek blessings for the cattle and the coming year. Prasad Preparation: Volunteers collaborated to cook traditional Pongal over an open traditional fire. The sweet offering was prepared as Prasad, symbolizing prosperity and communal harmony. The gathering was a beautiful reminder of our roots, blending selfless service with cultural devotion.</div>
+
+  <!-- P1 Images -->
+  <div class="iz" id="img-logo" data-label="Logo" style="left:4.5%;top:1%;width:6.5%;height:5%;" onclick="selImg(this)"><span class="tag">Logo</span></div>
+  <div class="iz" id="img-hero" data-label="Hero Group Photo" style="left:4.5%;top:19%;width:91%;height:33%;" onclick="selImg(this)"><span class="tag">Hero Photo</span></div>
+  <div class="iz" id="img-pongal" data-label="Pongal Celebration" style="left:69%;top:58%;width:26.5%;height:37%;" onclick="selImg(this)"><span class="tag">Pongal</span></div>
+
+  <!-- P1 Footer -->
+  <div class="tz" contenteditable="true" style="left:3%;top:97.3%;width:12%;height:2%;font-size:10px;font-weight:700;color:#fff;">Texas Gaushala</div>
 </div>
 
-<!-- PAGE 2 -->
-<div class="page-container" id="page-2">
-  <img class="page-bg" src="images_new/page-2.jpg" alt="Page 2">
-  
-  <!-- Logo P2 -->
-  <div class="img-zone" id="img-logo-2" data-label="Logo (P2)" 
-       style="left:2.2%; top:0.5%; width:3.2%; height:3.2%;" onclick="selectZone(this)">
-    <span class="label">Logo (P2)</span>
-  </div>
-  
-  <!-- Temple image -->
-  <div class="img-zone" id="img-temple" data-label="Meenakshi Temple" 
-       style="left:4.7%; top:24.5%; width:33%; height:33%;" onclick="selectZone(this)">
-    <span class="label">Meenakshi Temple</span>
-  </div>
-  
-  <!-- Family with cow -->
-  <div class="img-zone" id="img-family-cow" data-label="Family with Sacred Cow" 
-       style="left:4.7%; top:59%; width:45%; height:17.5%;" onclick="selectZone(this)">
-    <span class="label">Family with Sacred Cow</span>
-  </div>
-  
-  <!-- Altar -->
-  <div class="img-zone" id="img-altar" data-label="Sankranthi Altar" 
-       style="left:51%; top:59%; width:44.3%; height:17.5%;" onclick="selectZone(this)">
-    <span class="label">Sankranthi Altar</span>
-  </div>
-  
-  <!-- Telugu celebration -->
-  <div class="img-zone" id="img-telugu" data-label="Telugu Community" 
-       style="left:62%; top:79.5%; width:33.3%; height:17%;" onclick="selectZone(this)">
-    <span class="label">Telugu Community</span>
-  </div>
+<!-- ===== PAGE 2 ===== -->
+<div class="page-wrap" id="p2">
+  <img class="base" src="images_new/page-2.jpg">
+
+  <!-- P2 Lohri heading -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:4.2%;width:55%;height:3.2%;font-size:16px;font-weight:700;color:#222;font-family:Georgia,serif;">Warmth and Worship: Lohri Celebrations at the Gaushala</div>
+
+  <!-- P2 Lohri body -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:7.5%;width:89%;height:9.5%;font-size:9px;line-height:1.55;color:#333;font-family:Georgia,serif;">The spirit of Lohri brought a glow to the Gaushala on January 17, as our community gathered to mark the winter solstice with tradition and togetherness. From 4:00 PM to 6:30 PM, 30 volunteers came together to celebrate the festival of fire and harvest. The evening was centered around the sacred campfire, which was offered to the Lord as a gesture of gratitude for the season's blessings. As the flames rose, volunteers participated in traditional rituals, offering grains and sweets to the fire, symbolizing the casting away of the old and the welcoming of a prosperous new beginning.
+
+Beyond the rituals, the event served as a wonderful opportunity for our volunteers to bond over the warmth of the hearth, sharing stories and festive cheer in the peaceful presence of the cows.</div>
+
+  <!-- P2 Divine Encounter heading -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:19.6%;width:50%;height:3.2%;font-size:16px;font-weight:700;color:#222;font-family:Georgia,serif;">A Divine Encounter: Cows Visit Meenakshi Temple</div>
+
+  <!-- P2 Divine Encounter body -->
+  <div class="tz" contenteditable="true" style="left:29%;top:22.8%;width:66%;height:15%;font-size:9px;line-height:1.55;color:#333;font-family:Georgia,serif;">The spirit of the harvest festival reached a spiritual crescendo on January 17, as the Meenakshi Temple hosted a magnificent gathering centered on the sacred bond between humanity and cattle. Between 10:00 AM and 1:00 PM, an estimated 1,000 devotees joined in a heartfelt celebration of life and abundance.
+
+Gau Pooja: In a beautiful display of reverence, cows were honored with traditional rituals. Devotees offered prayers and sought blessings, acknowledging the cow as a symbol of the Earth's selfless giving. Feeding the Sacred: Following the Pooja, devotees participated in mass cow feeding, offering fresh greens and treats, embodying the festival's message of gratitude.
+
+The presence of the cows within the temple precincts created a serene, auspicious environment that left the 1,000-strong crowd deeply moved.</div>
+
+  <!-- P2 Image caption -->
+  <div class="tz" contenteditable="true" style="left:32%;top:66.8%;width:36%;height:1.2%;font-size:8px;font-style:italic;color:#777;text-align:center;">Family with sacred cow at the temple &bull; Makar Sankranthi altar at the Gaushala</div>
+
+  <!-- P2 Harvest heading -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:68.8%;width:58%;height:3.2%;font-size:16px;font-weight:700;color:#222;font-family:Georgia,serif;">Harvest Blessings: Celebrating with the Telugu Community</div>
+
+  <!-- P2 Harvest body -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:72%;width:63%;height:13.5%;font-size:9px;line-height:1.55;color:#333;font-family:Georgia,serif;">On January 17, the harvest festivities took on a special cultural resonance as our cows visited the local Telugu community. From 10:00 AM to 12:00 PM, the air was filled with devotion and festive cheer as 100 devotees gathered to honor the sacred animals.
+
+The morning was dedicated to the time-honored tradition of Gau Pooja. Members of the community offered prayers and traditional decorations to the cows, celebrating them as the "Gomata" (Mother Cow) and the backbone of agricultural prosperity. The highlight for many was the cow feeding, where families and children directly participated in the harvest spirit by offering fresh fodder and treats. This act of Gau Seva (service to cows) served as a poignant reminder of the gratitude that defines the Sankranti season.</div>
+
+  <!-- P2 Images -->
+  <div class="iz" id="img-temple" data-label="Meenakshi Temple" style="left:4.5%;top:23%;width:24%;height:24%;" onclick="selImg(this)"><span class="tag">Temple</span></div>
+  <div class="iz" id="img-family-cow" data-label="Family with Cow" style="left:4.5%;top:49%;width:45%;height:17%;" onclick="selImg(this)"><span class="tag">Family+Cow</span></div>
+  <div class="iz" id="img-altar" data-label="Sankranthi Altar" style="left:51%;top:49%;width:44%;height:17%;" onclick="selImg(this)"><span class="tag">Altar</span></div>
+  <div class="iz" id="img-telugu" data-label="Telugu Community" style="left:70%;top:69%;width:25.5%;height:26%;" onclick="selImg(this)"><span class="tag">Telugu</span></div>
+
+  <div class="tz" contenteditable="true" style="left:3%;top:97.3%;width:12%;height:2%;font-size:10px;font-weight:700;color:#fff;">Texas Gaushala</div>
 </div>
 
-<!-- PAGE 3 -->
-<div class="page-container" id="page-3">
-  <img class="page-bg" src="images_new/page-3.jpg" alt="Page 3">
-  
-  <!-- Logo P3 -->
-  <div class="img-zone" id="img-logo-3" data-label="Logo (P3)" 
-       style="left:2.2%; top:0.5%; width:3.2%; height:3.2%;" onclick="selectZone(this)">
-    <span class="label">Logo (P3)</span>
-  </div>
-  
-  <!-- Rudra ceremony -->
-  <div class="img-zone" id="img-rudra-ceremony" data-label="Rudra Ceremony" 
-       style="left:4.7%; top:31%; width:33%; height:22%;" onclick="selectZone(this)">
-    <span class="label">Rudra Ceremony</span>
-  </div>
-  
-  <!-- Rudra group full-width -->
-  <div class="img-zone" id="img-rudra-group" data-label="Rudra Homa Group" 
-       style="left:4.7%; top:55%; width:90.6%; height:17%;" onclick="selectZone(this)">
-    <span class="label">Rudra Homa Group</span>
-  </div>
-  
-  <!-- Madhavi Latha welcome -->
-  <div class="img-zone" id="img-madhavi-welcome" data-label="Madhavi Latha Welcome" 
-       style="left:62%; top:76%; width:33.3%; height:20%;" onclick="selectZone(this)">
-    <span class="label">Madhavi Latha Welcome</span>
-  </div>
+<!-- ===== PAGE 3 ===== -->
+<div class="page-wrap" id="p3">
+  <img class="base" src="images_new/page-3.jpg">
+
+  <!-- P3 Field Trip heading -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:4.2%;width:45%;height:3.2%;font-size:16px;font-weight:700;color:#222;font-family:Georgia,serif;">A Day of Joy: Family Field Trip to the Gaushala</div>
+
+  <!-- P3 Field Trip body -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:7.5%;width:89%;height:9.5%;font-size:9px;line-height:1.55;color:#333;font-family:Georgia,serif;">On January 17, the Gaushala opened its gates for a special Field Trip, welcoming a warm and lively group of friends and their families. It was a day dedicated to connection with nature, with our sacred animals, and with one another. The atmosphere was filled with laughter and curiosity as visitors of all ages explored the grounds. Children, in particular, delighted in the chance to interact with the animals, learning firsthand about the importance of Gau Seva (service to cows) and the role these gentle creatures play in our heritage. Whether it was feeding the cattle, walking through the serene pastures, or simply enjoying a picnic under the open sky, the sense of community was undeniable. The field trip served as a beautiful reminder that the Gaushala is not just a sanctuary for animals, but a place for families to gather, learn, and create lasting memories.</div>
+
+  <!-- P3 Rudra heading -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:22%;width:40%;height:3.2%;font-size:16px;font-weight:700;color:#222;font-family:Georgia,serif;">Rudrabhisheka and Rudra Homa Event</div>
+
+  <!-- P3 Rudra body -->
+  <div class="tz" contenteditable="true" style="left:29%;top:25.2%;width:66%;height:10%;font-size:9px;line-height:1.55;color:#333;font-family:Georgia,serif;">Texas Gaushala hosted Rudrabhisheka and Rudra Homa event on 14th Feb 2026 by the SVBF temple. About 10 Ritwiks chanted the Veda mantras. ~100 people attended the event. Lunch was served at the end of the event.
+
+It was very special event considering the day was on a Shani Trayodashi and one day prior to Maha Shivaratri. It was also special being on a Valentine's day and this was the 3rd Quarterly event at Texas Gaushala.</div>
+
+  <!-- P3 Rudra caption -->
+  <div class="tz" contenteditable="true" style="left:35%;top:70%;width:30%;height:1.2%;font-size:8px;font-style:italic;color:#777;text-align:center;">Rudra Homa: Ritwiks chanting Veda mantras at Texas Gaushala</div>
+
+  <!-- P3 Madhavi heading -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:72.2%;width:35%;height:3.2%;font-size:16px;font-weight:700;color:#222;font-family:Georgia,serif;">Madhavi Lathaji Visited Gaushala</div>
+
+  <!-- P3 Madhavi body -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:75.4%;width:63%;height:10%;font-size:9px;line-height:1.55;color:#333;font-family:Georgia,serif;">Kompella Madhavi Latha is a prominent Indian politician, entrepreneur, and philanthropist associated with the Bharatiya Janata Party (BJP) in Telangana. She contested as the BJP candidate for the Hyderabad Lok Sabha constituency in the 2024 general elections.
+
+Texas Gaushala was honored to host Madhavi Lathaji today. Her insightful talk placed the sacred cow at the heart of the conversation, covering a range of profound topics. Our sincere thanks to her and her dedicated team for making this visit possible.</div>
+
+  <!-- P3 Images -->
+  <div class="iz" id="img-rudra-ceremony" data-label="Rudra Ceremony" style="left:4.5%;top:23%;width:24%;height:23%;" onclick="selImg(this)"><span class="tag">Rudra Ceremony</span></div>
+  <div class="iz" id="img-rudra-group" data-label="Rudra Homa Group" style="left:4.5%;top:48%;width:91%;height:21%;" onclick="selImg(this)"><span class="tag">Rudra Group</span></div>
+  <div class="iz" id="img-madhavi-welcome" data-label="Madhavi Welcome" style="left:70%;top:73%;width:25.5%;height:22%;" onclick="selImg(this)"><span class="tag">Madhavi Welcome</span></div>
+
+  <div class="tz" contenteditable="true" style="left:3%;top:97.3%;width:12%;height:2%;font-size:10px;font-weight:700;color:#fff;">Texas Gaushala</div>
 </div>
 
-<!-- PAGE 4 -->
-<div class="page-container" id="page-4">
-  <img class="page-bg" src="images_new/page-4.jpg" alt="Page 4">
-  
-  <!-- Logo P4 -->
-  <div class="img-zone" id="img-logo-4" data-label="Logo (P4)" 
-       style="left:2.2%; top:0.5%; width:3.2%; height:3.2%;" onclick="selectZone(this)">
-    <span class="label">Logo (P4)</span>
-  </div>
-  
-  <!-- Madhavi speech -->
-  <div class="img-zone" id="img-madhavi-speech" data-label="Madhavi Latha Speech" 
-       style="left:4.7%; top:4%; width:90.6%; height:25%;" onclick="selectZone(this)">
-    <span class="label">Madhavi Latha Speech</span>
-  </div>
-  
-  <!-- Calf Narayan -->
-  <div class="img-zone" id="img-calf" data-label="Calf Narayan" 
-       style="left:4.7%; top:35%; width:33%; height:21%;" onclick="selectZone(this)">
-    <span class="label">Calf Narayan</span>
-  </div>
+<!-- ===== PAGE 4 ===== -->
+<div class="page-wrap" id="p4">
+  <img class="base" src="images_new/page-4.jpg">
+
+  <!-- P4 Madhavi speech caption -->
+  <div class="tz" contenteditable="true" style="left:36%;top:27%;width:28%;height:1.2%;font-size:8px;font-style:italic;color:#777;text-align:center;">Madhavi Latha addressing the community at Texas Gaushala</div>
+
+  <!-- P4 Calf heading -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:29.2%;width:25%;height:3.2%;font-size:16px;font-weight:700;color:#222;font-family:Georgia,serif;">Calf Spotlight: Narayan</div>
+
+  <!-- P4 Calf body -->
+  <div class="tz" contenteditable="true" style="left:28.5%;top:32.5%;width:66%;height:7%;font-size:9px;line-height:1.55;color:#333;font-family:Georgia,serif;">Narayan was born to Radha in later part of 2025. He had some complications initially and was not readily accepted by his mother but he continued to be strong and today he is having fun with lot of other new calves born in the ranch.
+
+He loves to be around visitors and can walk around fearlessly in between cows and humans as well.</div>
+
+  <!-- P4 Volunteer heading -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:58%;width:20%;height:3.2%;font-size:16px;font-weight:700;color:#222;font-family:Georgia,serif;">Volunteer Spotlight</div>
+
+  <!-- P4 Volunteer body -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:61.2%;width:89%;height:4%;font-size:9px;line-height:1.55;color:#333;font-family:Georgia,serif;">Our volunteers show up rain or shine. Early morning feedings, event setup, cleaning, facility repairs. They do it because they love these animals and believe in the mission. Whether you can give a few hours or a full day, there is always something meaningful to do at the Gaushala.</div>
+
+  <!-- P4 Event 1 -->
+  <div class="tz" contenteditable="true" style="left:5%;top:69.5%;width:43%;height:12%;font-size:9px;line-height:1.4;color:#333;font-family:Georgia,serif;">Holika Dahan 2026
+Mar 03, 2026
+5:30 PM - 7:00 PM
+Celebrate the triumph of good over evil around the sacred bonfire.
+20303 Kickapoo Rd, Waller, TX 77484</div>
+
+  <!-- P4 Event 2 -->
+  <div class="tz" contenteditable="true" style="left:52%;top:69.5%;width:43%;height:12%;font-size:9px;line-height:1.4;color:#333;font-family:Georgia,serif;">Houston Holi Mela 2026
+Mar 07, 2026
+11:00 AM - 3:30 PM CST
+A vibrant celebration of color, community, and the joy of spring.
+Texas Gaushala, Waller, TX 77484</div>
+
+  <!-- P4 Get Involved heading -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:83.2%;width:15%;height:3%;font-size:16px;font-weight:700;color:#222;font-family:Georgia,serif;">Get Involved</div>
+
+  <!-- P4 Get Involved body -->
+  <div class="tz" contenteditable="true" style="left:5.5%;top:86.5%;width:89%;height:4%;font-size:9px;line-height:1.55;color:#333;font-family:Georgia,serif;">To our incredible supporters: our deepest gratitude goes out to our Major Donors, Gau Grass members, corporate matching partners, and tireless volunteers. Your generous contributions and selfless dedication ensure our sacred cows have a place they can truly call home.</div>
+
+  <!-- P4 Social handles -->
+  <div class="tz" contenteditable="true" style="left:31%;top:93.6%;width:38%;height:1.2%;font-size:7px;color:#777;text-align:center;letter-spacing:0.5px;">@texasgaushala | TexasGaushala | @texasgaushala3634 | texas-gaushala</div>
+
+  <!-- P4 Quote -->
+  <div class="tz" contenteditable="true" style="left:28%;top:95.2%;width:44%;height:2%;font-size:9px;font-style:italic;color:#444;text-align:center;font-family:Georgia,serif;">"Every act of seva toward Gau Mata is an act of devotion to the divine."</div>
+
+  <!-- P4 Images -->
+  <div class="iz" id="img-madhavi-speech" data-label="Madhavi Speech" style="left:4.5%;top:4%;width:91%;height:22%;" onclick="selImg(this)"><span class="tag">Madhavi Speech</span></div>
+  <div class="iz" id="img-calf" data-label="Calf Narayan" style="left:4.5%;top:30%;width:23%;height:25%;" onclick="selImg(this)"><span class="tag">Calf Narayan</span></div>
+
+  <div class="tz" contenteditable="true" style="left:3%;top:97.2%;width:26%;height:2%;font-size:10px;font-weight:700;color:#fff;">Texas Gaushala &bull; www.texasgaushala.com</div>
 </div>
 
 <script>
-let selectedZone = null;
+let selEl = null;
 
-function selectZone(el) {
-  if (selectedZone) selectedZone.classList.remove('selected');
-  if (selectedZone === el) { selectedZone = null; updateUI(); return; }
-  selectedZone = el;
-  el.classList.add('selected');
-  updateUI();
+function selImg(el) {
+  if (selEl) selEl.classList.remove('selected');
+  if (selEl === el) { selEl = null; updUI(); return; }
+  selEl = el; el.classList.add('selected'); updUI();
 }
 
-function updateUI() {
-  const btn = document.getElementById('btn-replace');
-  const status = document.getElementById('ed-status');
-  if (selectedZone) {
-    btn.style.display = 'inline-block';
-    status.textContent = 'Selected: ' + selectedZone.dataset.label + ' (ID: ' + selectedZone.id + ')';
-  } else {
-    btn.style.display = 'none';
-    status.textContent = 'Click any image zone to select and replace it.';
-  }
+function updUI() {
+  document.getElementById('btn-replace').style.display = selEl ? 'inline-block' : 'none';
+  document.getElementById('ed-status').textContent = selEl 
+    ? 'Selected: ' + selEl.dataset.label + ' [' + selEl.id + ']' 
+    : 'Click text to edit. Click images to replace.';
 }
 
-function replaceImage() {
-  if (!selectedZone) return;
+function replaceImg() {
+  if (!selEl) return;
   const inp = document.createElement('input');
-  inp.type = 'file'; inp.accept = 'image/*';
+  inp.type='file'; inp.accept='image/*';
   inp.onchange = function() {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      // Remove existing replacement if any
-      const existing = selectedZone.querySelector('img.replacement');
-      if (existing) existing.remove();
-      // Add new image overlay
-      const img = document.createElement('img');
-      img.className = 'replacement';
+    const r = new FileReader();
+    r.onload = function(e) {
+      let img = selEl.querySelector('img.rep');
+      if (!img) { img = document.createElement('img'); img.className='rep'; selEl.appendChild(img); }
       img.src = e.target.result;
-      selectedZone.appendChild(img);
-      document.getElementById('ed-status').textContent = 'Replaced: ' + selectedZone.dataset.label;
+      document.getElementById('ed-status').textContent = 'Replaced: ' + selEl.dataset.label;
     };
-    reader.readAsDataURL(inp.files[0]);
+    r.readAsDataURL(inp.files[0]);
   };
   inp.click();
 }
 
-function downloadPDF() {
-  window.print();
-}
-
-function downloadImages() {
-  // List all replaced images
-  const replacements = document.querySelectorAll('.img-zone img.replacement');
-  if (replacements.length === 0) {
-    alert('No images have been replaced yet. Replace images first, then export.');
-    return;
-  }
-  let info = 'Replaced images:\\n\\n';
-  replacements.forEach(img => {
-    const zone = img.closest('.img-zone');
-    info += zone.id + ' (' + zone.dataset.label + ')\\n';
+let zonesVisible = true;
+function toggleZones() {
+  zonesVisible = !zonesVisible;
+  document.querySelectorAll('.iz').forEach(el => el.style.display = zonesVisible ? '' : 'none');
+  document.querySelectorAll('.tz').forEach(el => {
+    if (zonesVisible) { el.setAttribute('contenteditable','true'); el.style.pointerEvents=''; }
+    else { el.removeAttribute('contenteditable'); el.style.pointerEvents='none'; }
   });
-  alert(info + '\\nUse Print/Save as PDF to capture the full newsletter with replacements.');
 }
 
-// Deselect on clicking outside
 document.addEventListener('click', function(e) {
-  if (!e.target.closest('.img-zone') && !e.target.closest('#ed-toolbar')) {
-    if (selectedZone) { selectedZone.classList.remove('selected'); selectedZone = null; updateUI(); }
+  if (!e.target.closest('.iz') && !e.target.closest('#ed-toolbar')) {
+    if (selEl) { selEl.classList.remove('selected'); selEl = null; updUI(); }
   }
 });
 </script>
-
 </body>
 </html>
